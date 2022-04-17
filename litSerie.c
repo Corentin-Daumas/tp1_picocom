@@ -17,6 +17,7 @@ int main(int N, char *P[])
 {
 int fd, speed, n;
 char rcv_buf[LBUF];
+char send_buf[LBUF];
 
     if (N != 3) {
        printf("Utilisation: %s /dev/ttyXX vitesse_en_baud\n",P[0]);
@@ -37,6 +38,7 @@ char rcv_buf[LBUF];
            break;
         }
     }
+
     printf("Au revoir !\n");
     UART_Close(fd);
     return 0;

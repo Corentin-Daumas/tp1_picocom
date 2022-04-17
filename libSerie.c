@@ -62,30 +62,11 @@ void UART_Close(int fd)
 int UART_Init(int fd, int speed,int flowCtrl,int dbits,int stopb,
     int delai, int nbcmin, char parity)
 {
-int i;
-int speed_arr[]={B115200, B57600, B38400, B19200, B9600, B4800, B2400, B1800};
-int valeur[]={115200, 57600, 38400, 19200, 9600, 4800, 2400, 1800};
-struct termios options;
-
-    if ( tcgetattr(fd,&options) != 0) {
-        perror("tcgetattr");
-        return(ERROR);
-    }
-
-    /* Mise en place des vitesse en entree et en sortie */
-    for (i=0; i<NBSPEED; i++) {
-        if (speed == valeur[i]) {
-            cfsetispeed(&options, speed_arr[i]);
-            cfsetospeed(&options, speed_arr[i]);
-            break;
-        }
-    }
-    if (i==NBSPEED) {
-       fprintf(stderr,"Vitesse invalide = %d\n",speed);
-       return(ERROR);
-    }
-    options.c_cflag |= CLOCAL; /* Ignore modem control lines */
-    options.c_cflag |= CREAD; /* Enable receiver */
+     UART_SetSpeed(fd, speed);
+     struct termios options;
+     
+     options.c_cflag |= CLOCAL; /* Ignore modem control lines */
+     options.c_cflag |= CREAD; /* Enable receiver */
 
     /* pour les controles de flux */
     switch(flowCtrl) {
@@ -179,9 +160,41 @@ struct termios options;
 *            len : Longueur du buffer
 * Retour : nb de car. lu ou ERROR
 *******************************************************************/
-int UART_Recv(int fd, char *buf,int len)
+int UART_Recv(int fd, char *buf, int len)
 {
      return (read(fd,buf,len));
+}
+
+int UART_Send(int fd, char *buf, int len)
+{
+     return (write(fd,buf,len));
+}
+
+int UART_SetSpeed(int fd, int speed)
+{
+     int i;
+     int speed_arr[]={B115200, B57600, B38400, B19200, B9600, B4800, B2400, B1800};
+     int valeur[]={115200, 57600, 38400, 19200, 9600, 4800, 2400, 1800};
+     
+     struct termios options;
+
+     if ( tcgetattr(fd,&options) != 0) {
+          perror("tcgetattr");
+          return(ERROR);
+     }
+
+     /* Mise en place des vitesse en entree et en sortie */
+     for (i=0; i<NBSPEED; i++) {
+          if (speed == valeur[i]) {
+               cfsetispeed(&options, speed_arr[i]);
+               cfsetospeed(&options, speed_arr[i]);
+               break;
+          }
+     }
+     if (i==NBSPEED) {
+          fprintf(stderr,"Vitesse invalide = %d\n",speed);
+          return(ERROR);
+    }
 }
 
 static int RUN=1; /* variable qui permet d'indiquer l'arret de la boucle */
